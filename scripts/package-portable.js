@@ -8,6 +8,7 @@ const appDir = path.join(releaseDir, 'portable-win-x64');
 const appResourcesDir = path.join(appDir, 'resources', 'app');
 const sourcePackagePath = path.join(rootDir, 'package.json');
 const sourceConfigPath = path.join(rootDir, 'opencode.json');
+const shouldCopyDefaultConfig = process.env.SKIP_LOCAL_CONFIG_COPY !== 'true';
 
 async function exists(targetPath) {
   try {
@@ -42,6 +43,10 @@ async function createAppPackageJson() {
 }
 
 async function copyDefaultConfigIfPresent() {
+  if (!shouldCopyDefaultConfig) {
+    return;
+  }
+
   if (await exists(sourceConfigPath)) {
     await fs.copyFile(sourceConfigPath, path.join(appDir, 'opencode.json'));
   }
