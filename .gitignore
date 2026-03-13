@@ -1,0 +1,7 @@
+node_modules/
+release/
+.local-artifacts/
+.sisyphus/
+*.log
+*.png
+opencode.json
