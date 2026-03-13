@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'" />
+    <title>Provider 编辑器</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar panel">
+        <div>
+          <p class="eyebrow" data-i18n="app.subtitle">OpenCode / Provider 工作台</p>
+          <h1 data-i18n="app.title">Provider 编辑器</h1>
+          <p class="lede" data-i18n="app.description">
+            这是一个仅用于编辑 `provider` 配置的桌面编辑器。加载 `opencode.json`，编辑提供商和模型，然后仅保存 provider 部分。
+          </p>
+        </div>
+
+        <div class="panel inset actions">
+          <button id="loadDefaultButton" class="primary" type="button" data-i18n="button.loadWorkspace">加载工作区配置</button>
+          <button id="openFileButton" type="button" data-i18n="button.openConfig">打开其他配置</button>
+          <button id="saveButton" type="button" data-i18n="button.saveProvider">保存 provider 部分</button>
+        </div>
+
+        <div class="panel inset file-card">
+          <div class="meta-row">
+            <span data-i18n="label.currentFile">当前文件</span>
+            <strong id="currentFileLabel">未加载</strong>
+          </div>
+          <div class="meta-row">
+            <span data-i18n="label.status">状态</span>
+            <strong id="statusLabel">就绪</strong>
+          </div>
+        </div>
+
+        <div class="panel inset provider-list-wrap">
+          <div class="section-head">
+            <h2 data-i18n="section.providers">提供商</h2>
+            <button id="addProviderButton" type="button" data-i18n="button.addProvider">添加提供商</button>
+          </div>
+          <div id="providerList" class="provider-list"></div>
+        </div>
+
+        <div class="panel inset prefs-panel">
+          <div class="section-head small">
+            <h3 data-i18n="section.preferences">偏好设置</h3>
+          </div>
+          <div class="prefs-controls">
+            <div class="pref-item">
+              <span data-i18n="label.language">语言</span>
+              <div class="toggle-group" id="languageToggle">
+                <button type="button" data-lang="zh" class="active">中文</button>
+                <button type="button" data-lang="en">English</button>
+              </div>
+            </div>
+            <div class="pref-item">
+              <span data-i18n="label.theme">主题</span>
+              <div class="toggle-group" id="themeToggle">
+                <button type="button" data-theme="light" class="active">
+                  <span class="icon">☀</span>
+                  <span data-i18n="theme.light">浅色</span>
+                </button>
+                <button type="button" data-theme="dark">
+                  <span class="icon">☾</span>
+                  <span data-i18n="theme.dark">深色</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main-grid">
+        <section class="panel editor-panel">
+          <div class="section-head tight">
+            <div>
+              <p class="eyebrow" data-i18n="section.providerDetails">Provider 详情</p>
+              <h2 id="providerEditorTitle">选择一个 provider</h2>
+            </div>
+            <button id="deleteProviderButton" class="danger" type="button" data-i18n="button.deleteProvider">删除提供商</button>
+          </div>
+
+          <div class="panel-body">
+            <div class="form-grid">
+              <label>
+                <span data-i18n="label.providerKey">Provider 键名</span>
+                <input id="providerKeyInput" type="text" data-i18n-placeholder="placeholder.providerKey" placeholder="provider-id" />
+              </label>
+              <label>
+                <span data-i18n="label.displayName">显示名称</span>
+                <input id="providerNameInput" type="text" data-i18n-placeholder="placeholder.displayName" placeholder="可选的显示名称" />
+              </label>
+              <label>
+                <span data-i18n="label.npmPackage">npm 包</span>
+                <select id="providerNpmInput">
+                  <option value="" data-i18n="option.selectNpmPackage">-- 选择 npm 包 --</option>
+                  <option value="@ai-sdk/openai">@ai-sdk/openai</option>
+                  <option value="@ai-sdk/anthropic">@ai-sdk/anthropic</option>
+                  <option value="@ai-sdk/google">@ai-sdk/google</option>
+                  <option value="@ai-sdk/openai-compatible">@ai-sdk/openai-compatible</option>
+                </select>
+              </label>
+              <label>
+                <span data-i18n="label.baseUrl">基础 URL</span>
+                <input id="providerBaseUrlInput" type="text" data-i18n-placeholder="placeholder.baseUrl" placeholder="https://api.example.com/v1" />
+              </label>
+              <label>
+                <span data-i18n="label.apiKey">API 密钥</span>
+                <input id="providerApiKeyInput" type="text" data-i18n-placeholder="placeholder.apiKey" placeholder="建议使用 {env:YOUR_API_KEY}" />
+              </label>
+              <label>
+                <span data-i18n="label.setCacheKey">设置缓存键</span>
+                <select id="providerSetCacheKeyInput">
+                  <option value="" data-i18n="option.unset">未设置</option>
+                  <option value="true" data-i18n="option.true">是</option>
+                  <option value="false" data-i18n="option.false">否</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="json-pair provider-json-pair">
+              <label>
+                <span data-i18n="label.providerOptions">Provider 选项 JSON</span>
+                <textarea id="providerOptionsInput" spellcheck="false" data-i18n-placeholder="placeholder.providerOptions" placeholder="额外的 provider 选项对象"></textarea>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel editor-panel">
+          <div class="section-head tight">
+            <div>
+              <p class="eyebrow" data-i18n="section.modelDetails">模型详情</p>
+              <h2 id="modelEditorTitle">选择一个模型</h2>
+            </div>
+            <div class="button-row">
+              <button id="addModelButton" type="button" data-i18n="button.addModel">添加模型</button>
+              <button id="deleteModelButton" class="danger" type="button" data-i18n="button.deleteModel">删除模型</button>
+            </div>
+          </div>
+
+          <div class="panel-body">
+            <div class="dual-list">
+              <div class="panel inset model-list-wrap">
+                <div class="section-head small">
+                  <h3 data-i18n="section.models">模型</h3>
+                </div>
+                <div id="modelList" class="model-list"></div>
+              </div>
+
+              <div class="model-form">
+                <div class="form-grid compact">
+                  <label>
+                    <span data-i18n="label.modelKey">模型键名</span>
+                    <input id="modelKeyInput" type="text" data-i18n-placeholder="placeholder.modelKey" placeholder="gpt-5.4" />
+                  </label>
+                  <label>
+                    <span data-i18n="label.displayName">显示名称</span>
+                    <input id="modelNameInput" type="text" data-i18n-placeholder="placeholder.modelDisplayName" placeholder="GPT-5.4" />
+                  </label>
+                  <label>
+                    <span data-i18n="label.thinking">思考模式</span>
+                    <select id="modelThinkingInput">
+                      <option value="" data-i18n="option.unset">未设置</option>
+                      <option value="true" data-i18n="option.true">是</option>
+                      <option value="false" data-i18n="option.false">否</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span data-i18n="label.contextLimit">上下文限制</span>
+                    <input id="modelContextLimitInput" type="number" min="0" data-i18n-placeholder="placeholder.contextLimit" placeholder="400000" />
+                  </label>
+                  <label>
+                    <span data-i18n="label.outputLimit">输出限制</span>
+                    <input id="modelOutputLimitInput" type="number" min="0" data-i18n-placeholder="placeholder.outputLimit" placeholder="128000" />
+                  </label>
+                </div>
+
+                <div class="json-pair stacked">
+                  <label>
+                    <span data-i18n="label.modalities">模态 JSON</span>
+                    <textarea id="modelModalitiesInput" spellcheck="false" data-i18n-placeholder="placeholder.modalities" placeholder='{"input":["text"],"output":["text"]}'></textarea>
+                  </label>
+                  <label>
+                    <span data-i18n="label.modelOptions">模型选项 JSON</span>
+                    <textarea id="modelOptionsInput" spellcheck="false" data-i18n-placeholder="placeholder.modelOptions" placeholder="额外的模型选项对象"></textarea>
+                  </label>
+                  <label>
+                    <span data-i18n="label.variants">变体 JSON</span>
+                    <textarea id="modelVariantsInput" spellcheck="false" data-i18n-placeholder="placeholder.variants" placeholder="变体定义对象"></textarea>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel preview-panel">
+          <div class="section-head tight">
+            <div>
+              <p class="eyebrow" data-i18n="section.preview">预览</p>
+              <h2 data-i18n="section.providerJson">Provider JSON</h2>
+            </div>
+            <span id="providerCountBadge" class="badge">0 个提供商</span>
+          </div>
+
+          <div class="panel-body preview-body">
+            <pre id="previewPane" class="preview-pane">{
+  "provider": {}
+}</pre>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <template id="listItemTemplate">
+      <button class="list-item" type="button"></button>
+    </template>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
