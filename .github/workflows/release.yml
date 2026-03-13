@@ -29,18 +29,18 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Set up pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v4.4.0
         with:
           version: 10.30.3
           run_install: false
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: pnpm
@@ -86,18 +86,30 @@ jobs:
           Compress-Archive -Path 'release/portable-win-x64/*' -DestinationPath '${{ steps.release_meta.outputs.archive_path }}' -Force
 
       - name: Upload workflow artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.release_meta.outputs.archive_name }}
           path: ${{ steps.release_meta.outputs.archive_path }}
           if-no-files-found: error
 
       - name: Publish GitHub release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.release_meta.outputs.release_tag }}
-          target_commitish: ${{ github.sha }}
-          name: ${{ steps.release_meta.outputs.release_name }}
-          generate_release_notes: true
-          prerelease: ${{ steps.release_meta.outputs.release_prerelease == 'true' }}
-          files: ${{ steps.release_meta.outputs.archive_path }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.release_meta.outputs.release_tag }}
+          RELEASE_NAME: ${{ steps.release_meta.outputs.release_name }}
+          RELEASE_PRERELEASE: ${{ steps.release_meta.outputs.release_prerelease }}
+          ARCHIVE_PATH: ${{ steps.release_meta.outputs.archive_path }}
+        shell: pwsh
+        run: |
+          $commonArgs = @($env:RELEASE_TAG, $env:ARCHIVE_PATH, '--repo', '${{ github.repository }}', '--title', $env:RELEASE_NAME, '--generate-notes')
+          if ($env:RELEASE_PRERELEASE -eq 'true') {
+            $commonArgs += '--prerelease'
+          }
+
+          gh release view $env:RELEASE_TAG --repo '${{ github.repository }}' *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $env:RELEASE_TAG $env:ARCHIVE_PATH --repo '${{ github.repository }}' --clobber
+          }
+          else {
+            gh release create @commonArgs
+          }
