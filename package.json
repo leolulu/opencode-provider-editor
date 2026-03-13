@@ -1,0 +1,66 @@
+{
+  "name": "opencode-provider-editor",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.30.3",
+  "description": "Windows desktop editor for the provider section of opencode.json",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack:deps": "electron-builder install-app-deps",
+    "dist:portable": "node scripts/package-portable.js",
+    "dist:dir": "electron-builder --win --dir",
+    "dist:win": "electron-builder --win"
+  },
+  "devDependencies": {
+    "app-builder-bin": "5.0.0-alpha.12",
+    "electron": "^37.2.0",
+    "electron-builder": "^26.8.1"
+  },
+  "build": {
+    "appId": "ai.opencode.provider-editor",
+    "productName": "OpenCode Provider Editor",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "asar": true,
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowElevation": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "artifactName": "${productName}-Setup-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "${productName}-Portable-${version}.${ext}"
+    }
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "app-builder-bin",
+      "electron",
+      "electron-builder"
+    ]
+  }
+}
